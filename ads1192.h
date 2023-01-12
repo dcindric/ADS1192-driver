@@ -9,6 +9,17 @@
 #define DISABLE 0
 #endif
 
+/*Read opcode bytes definitions*/
+#define ADS119X_READ_FIRST_OPCODE_BYTE   (0x20)  
+#define ADS119X_READ_SECOND_OPCODE_BYTE  (0x00)  //Number of regs to read - 1.
+#define ADS119X_READ_OPCODE_LEN          (2)
+
+
+#define ADS119X_WRITE_FIRST_OPCODE_BYTE (0x40)
+#define ADS119X_WRITE_SECOND_OPCODE_BYTE (0x00)
+#define ADS119X_WRITE_OPCODE_LEN        (2)
+
+
 /*Register address definitions*/
 
 /*Device settings (read-only registers)*/
@@ -31,19 +42,6 @@
 #define ADS119X_REG_MISC1       (0x09)
 #define ADS119X_REG_MISC2       (0x0A)
 #define ADS119X_REG_GPIO        (0x0B)
-
-
-typedef struct
-{
-    //TODO: Add function pointers to read and write functions.
-
-} ads119x_config_t;
-typedef struct
-{
-    uint16_t ch1_raw_data;
-    uint16_t ch2_raw_data;
-
-} ads119x_meas_t;
 
 
 typedef enum
@@ -170,108 +168,188 @@ typedef enum
 
 } ads119x_ch_input_source_t;
 
-ads119x_ret_val_t ads119x_get_device_id (ads119x_device_id_t * ads119x_device_id);
 
-ads119x_ret_val_t ads119x_get_data_rate (ads119x_data_rate_t * ads119x_data_rate);
-ads119x_ret_val_t ads119x_set_data_rate (ads119x_data_rate_t ads119x_data_rate);
+/*Function pointer type declarations*/
+typedef ads119x_ret_val_t (*ads119x_spi_write) (uint8_t * send_buffer, uint8_t len);
+typedef ads119x_ret_val_t (*ads119x_spi_read) (uint8_t * recv_buffer, uint8_t len);
+typedef ads119x_ret_val_t (*ads119x_start_set) (uint8_t start_pin_state);
+typedef ads119x_ret_val_t (*ads119x_reset) (uint8_t reset_pin_state);
 
-ads119x_ret_val_t ads119x_get_conversion_mode (asd119x_conversion_mode_t * conv_mode);
-ads119x_ret_val_t ads119x_set_conversion_mode (asd119x_conversion_mode_t conv_mode);
+typedef struct
+{
+    ads119x_spi_read f_dev_spi_read; 
+    ads119x_spi_write f_dev_spi_write;
+    ads119x_start_set f_dev_start_set;
+    ads119x_reset f_dev_reset;
 
-ads119x_ret_val_t ads119x_lead_off_comparator_enable (void);
-ads119x_ret_val_t ads119x_lead_off_comparator_disable (void);
+} ads119x_config_t;
 
-ads119x_ret_val_t ads119x_reference_buffer_enable (void);
-ads119x_ret_val_t ads119x_reference_buffer_disable (void);
+typedef struct
+{
+    uint16_t ch1_raw_data;
+    uint16_t ch2_raw_data;
+    uint16_t status_info;
 
-ads119x_ret_val_t ads119x_set_volt_reference (ads119x_reference_t volt_reference_val);
-
-ads119x_ret_val_t ads119x_clock_osc_out_enable (void);
-ads119x_ret_val_t ads119x_clock_osc_out_disable (void);
-
-ads119x_ret_val_t ads119x_test_signal_enable (void);
-ads119x_ret_val_t ads119x_test_signal_disable (void);
-ads119x_ret_val_t ads119x_test_signal_set_freq_dc (void);
-ads119x_ret_val_t ads119x_test_signal_set_freq_1hz (void);
-
-ads119x_ret_val_t ads119x_lead_off_comparator_set_pos_val (ads119x_lead_off_comp_pos_side_val_t comp_pos_val);
-ads119x_ret_val_t ads119x_lead_off_comparator_set_neg_val (ads119x_lead_off_comp_neg_side_val_t comp_neg_val);
-
-ads119x_ret_val_t ads119x_lead_off_current_set_val (ads119x_lead_off_curr_val_t lead_off_curr_val);
-ads119x_ret_val_t ads119x_lead_off_freq_dc (void);
-ads119x_ret_val_t ads119x_lead_off_freq_ac (void);
+} ads119x_meas_t;
 
 
-ads119x_ret_val_t ads119x_ch1_power_down (void);
-ads119x_ret_val_t ads119x_ch1_normal_operation (void);
-ads119x_ret_val_t ads119x_ch1_pga_gain_set_val (ads119x_channel_pga_gain_t pga_gain_val);
-ads119x_ret_val_t ads119x_ch1_input_source_select (ads119x_ch_input_source_t ch_input_source);
+ads119x_ret_val_t ads119x_read_register (uint8_t reg_addr, uint8_t * reg_data);
+ads119x_ret_val_t ads119x_write_register (uint8_t reg_addr, uint8_t reg_data);
 
-ads119x_ret_val_t ads119x_ch2_power_down (void);
-ads119x_ret_val_t ads119x_ch2_normal_operation (void);
-ads119x_ret_val_t ads119x_ch2_pga_gain_set_val (ads119x_channel_pga_gain_t pga_gain_val);
-ads119x_ret_val_t ads119x_ch2_input_source_select (ads119x_ch_input_source_t ch_input_source);
+ads119x_ret_val_t ads119x_write_command (ads119x_command_t ads119x_command);
 
-ads119x_ret_val_t ads119x_rld_buffer_enable (void);
-ads119x_ret_val_t ads119x_rld_buffer_disable (void);
-ads119x_ret_val_t ads119x_rld_lead_off_sense_enable (void);
-ads119x_ret_val_t ads119x_rld_lead_off_sense_disable (void);
-ads119x_ret_val_t ads119x_rld_ch1_neg_enable (void);
-ads118x_ret_val_t ads118x_rld_ch1_neg_disable (void);
-ads119x_ret_val_t ads119x_rld_ch1_pos_enable (void);
-ads119x_ret_val_t ads119x_rld_ch1_pos_disable (void);
+ads119x_ret_val_t ads119x_comm_interface_init (void);
+ads119x_ret_val_t ads119x_device_init (void);
 
-ads119x_ret_val_t ads119x_rld_ch2_neg_enable (void);
-ads118x_ret_val_t ads118x_rld_ch2_neg_disable (void);
-ads119x_ret_val_t ads119x_rld_ch2_pos_enable (void);
-ads119x_ret_val_t ads119x_rld_ch2_pos_disable (void);
+//ID register
+ads119x_ret_val_t ads119x_get_id_register (uint8_t * reg_id_data);
+void ads119x_get_device_id (ads119x_device_id_t * ads119x_device_id);
 
-ads119x_ret_val_t ads119x_lead_off_ch1_curr_dir_enable (void);
-ads119x_ret_val_t ads119x_lead_off_ch1_curr_dir_disable (void);
+//CONFIG1 register
+ads119x_ret_val_t ads119x_get_config_1_register (uint8_t * reg_config_1_data);
 
-ads119x_ret_val_t ads119x_lead_off_ch2_curr_dir_enable (void);
-ads119x_ret_val_t ads119x_lead_off_ch2_curr_dir_disable (void);
+void ads119x_get_data_rate (ads119x_data_rate_t * ads119x_data_rate);
+void ads119x_set_data_rate (ads119x_data_rate_t ads119x_data_rate);
 
-ads119x_ret_val_t ads119x_lead_off_ch1_pos_in_enable (void);
-ads119x_ret_val_t ads119x_lead_off_ch1_pos_in_disable (void);
-ads119x_ret_val_t ads119x_lead_off_ch1_neg_in_enable (void);
-ads119x_ret_val_t ads119x_lead_off_ch1_neg_in_disable (void);
+void ads119x_get_conversion_mode (asd119x_conversion_mode_t * conv_mode);
+void ads119x_set_conversion_mode (asd119x_conversion_mode_t conv_mode);
 
-ads119x_ret_val_t ads119x_lead_off_ch2_pos_in_enable (void);
-ads119x_ret_val_t ads119x_lead_off_ch2_pos_in_disable (void);
-ads119x_ret_val_t ads119x_lead_off_ch1_neg_in_enable (void);
-ads119x_ret_val_t ads119x_lead_off_ch1_neg_in_disable (void);
+//CONFIG2 register
+ads119x_ret_val_t ads119x_get_config_2_register (uint8_t * reg_config_2_data);
 
-ads119x_ret_val_t ads119x_set_clock_div_4 (void);
-ads119x_ret_val_t ads119x_set_clock_div_16 (void);
+void ads119x_lead_off_comparator_enable (void);
+void ads119x_lead_off_comparator_disable (void);
 
-ads119x_ret_val_t ads119x_get_rld_status (void);
-ads119x_ret_val_t ads119x_rld_enable (void);
-ads119x_ret_val_t ads119x_rld_disable (void);
+void ads119x_reference_buffer_enable (void);
+void ads119x_reference_buffer_disable (void);
 
-ads119x_ret_val_t ads119x_ch1_pos_in_enable (void);
-ads119x_ret_val_t ads119x_ch1_neg_in_disable (void);
-ads119x_ret_val_t ads119x_ch1_neg_in_enable (void);
-ads119x_ret_val_t ads119x_ch1_neg_in_disable (void);
+void ads119x_set_volt_reference (ads119x_reference_t volt_reference_val);
 
-ads119x_ret_val_t ads119x_ch2_pos_in_enable (void);
-ads119x_ret_val_t ads119x_ch2_neg_in_disable (void);
-ads119x_ret_val_t ads119x_ch2_neg_in_enable (void);
-ads119x_ret_val_t ads119x_ch2_neg_in_disable (void);
+void ads119x_clock_osc_out_enable (void);
+void ads119x_clock_osc_out_disable (void);
 
-ads119x_ret_val_t ads119x_offset_calibration_enable (void);
-ads119x_ret_val_t ads119x_offset_calibration_disable (void);
+void ads119x_test_signal_enable (void);
+void ads119x_test_signal_disable (void);
+void ads119x_test_signal_set_freq_dc (void);
+void ads119x_test_signal_set_freq_1hz (void);
 
-ads119x_ret_val_t ads119x_rld_reference_set_external (void);
-ads119x_ret_val_t ads119x_rld_reference_set_internal (void);
-ads119x_ret_val_t ads119x_rld_referenc_get (void);
+//LOFF register
+ads119x_ret_val_t ads119x_get_loff_register (uint8_t * reg_loff_data);
 
-ads119x_ret_val_t ads119x_gpio1_config (void);
-ads119x_ret_val_t ads119x_gpio1_set (void);
-ads119x_ret_val_t ads119x_gpio1_reset (void);
-ads119x_ret_val_t ads119x_gpio1_get (void);
+void ads119x_lead_off_comparator_set_pos_val (ads119x_lead_off_comp_pos_side_val_t comp_pos_val);
+void ads119x_lead_off_comparator_set_neg_val (ads119x_lead_off_comp_neg_side_val_t comp_neg_val);
 
-ads119x_ret_val_t ads119x_gpio2_config (void);
-ads119x_ret_val_t ads119x_gpio2_set (void);
-ads119x_ret_val_t ads119x_gpio2_reset (void);
-ads119x_ret_val_t ads119x_gpio2_get (void);
+void ads119x_lead_off_current_set_val (ads119x_lead_off_curr_val_t lead_off_curr_val);
+void ads119x_lead_off_freq_dc (void);
+void ads119x_lead_off_freq_ac (void);
+
+//CH1SET register
+ads119x_ret_val_t ads119x_get_ch1set_register (uint8_t * reg_ch1set_data);
+
+void ads119x_ch1_power_down (void);
+void ads119x_ch1_normal_operation (void);
+void ads119x_ch1_pga_gain_set_val (ads119x_channel_pga_gain_t pga_gain_val);
+void ads119x_ch1_input_source_select (ads119x_ch_input_source_t ch_input_source);
+
+//CH2 register
+ads119x_ret_val_t ads119x_get_ch2set_register (uint8_t * reg_ch2set_data);
+
+void ads119x_ch2_power_down (void);
+void ads119x_ch2_normal_operation (void);
+void ads119x_ch2_pga_gain_set_val (ads119x_channel_pga_gain_t pga_gain_val);
+void ads119x_ch2_input_source_select (ads119x_ch_input_source_t ch_input_source);
+
+//RLD_SENS register
+ads119x_ret_val_t ads119x_get_rld_sens_register (uint8_t * reg_rld_sens_data);
+
+void ads119x_rld_buffer_enable (void);
+void ads119x_rld_buffer_disable (void);
+void ads119x_rld_lead_off_sense_enable (void);
+void ads119x_rld_lead_off_sense_disable (void);
+void ads119x_rld_ch1_neg_enable (void);
+void ads118x_rld_ch1_neg_disable (void);
+void ads119x_rld_ch1_pos_enable (void);
+void ads119x_rld_ch1_pos_disable (void);
+
+void ads119x_rld_ch2_neg_enable (void);
+void ads118x_rld_ch2_neg_disable (void);
+void ads119x_rld_ch2_pos_enable (void);
+void ads119x_rld_ch2_pos_disable (void);
+
+//LOFF_SENS register
+ads119x_ret_val_t ads119x_get_loff_sens_register (uint8_t * reg_loff_sens_data);
+
+void ads119x_lead_off_ch1_curr_dir_enable (void);
+void ads119x_lead_off_ch1_curr_dir_disable (void);
+
+void ads119x_lead_off_ch2_curr_dir_enable (void);
+void ads119x_lead_off_ch2_curr_dir_disable (void);
+
+void ads119x_lead_off_ch1_pos_in_enable (void);
+void ads119x_lead_off_ch1_pos_in_disable (void);
+void ads119x_lead_off_ch1_neg_in_enable (void);
+void ads119x_lead_off_ch1_neg_in_disable (void);
+
+void ads119x_lead_off_ch2_pos_in_enable (void);
+void ads119x_lead_off_ch2_pos_in_disable (void);
+void ads119x_lead_off_ch1_neg_in_enable (void);
+void ads119x_lead_off_ch1_neg_in_disable (void);
+
+//LOFF_STAT register
+ads119x_ret_val_t ads119x_get_loff_state_register (uint8_t * reg_loff_stat_data);
+
+void ads119x_set_clock_div_4 (void);
+void ads119x_set_clock_div_16 (void);
+
+void ads119x_get_rld_status (void);
+void ads119x_rld_enable (void);
+void ads119x_rld_disable (void);
+
+void ads119x_ch1_pos_in_enable (void);
+void ads119x_ch1_neg_in_disable (void);
+void ads119x_ch1_neg_in_enable (void);
+void ads119x_ch1_neg_in_disable (void);
+
+void ads119x_ch2_pos_in_enable (void);
+void ads119x_ch2_neg_in_disable (void);
+void ads119x_ch2_neg_in_enable (void);
+void ads119x_ch2_neg_in_disable (void);
+
+//MISC1 register
+ads119x_ret_val_t ads119x_get_misc1_register (uint8_t * reg_misc1_data);
+
+//MISC2 register
+ads119x_ret_val_t ads119x_get_misc2_register (uint8_t * reg_misc2_data);
+
+void ads119x_offset_calibration_enable (void);
+void ads119x_offset_calibration_disable (void);
+
+void ads119x_rld_reference_set_external (void);
+void ads119x_rld_reference_set_internal (void);
+void ads119x_rld_referenc_get (void);
+
+//GPIO register
+ads119x_ret_val_t ads119x_get_gpio_register (uint8_t * reg_gpio_data);
+
+void ads119x_gpio1_config (void);
+void ads119x_gpio1_set (void);
+void ads119x_gpio1_reset (void);
+void ads119x_gpio1_get (void);
+
+void ads119x_gpio2_config (void);
+void ads119x_gpio2_set (void);
+void ads119x_gpio2_reset (void);
+void ads119x_gpio2_get (void);
+
+//Higher-level functions
+ads119x_ret_val_t ads119x_standby_mode_enter (void);
+ads119x_ret_val_t ads119x_standby_mode_wakeup (void);
+
+ads119x_ret_val_t ads119x_start_conversion (void);
+ads119x_ret_val_t ads119x_stop_conversion (void);
+ads119x_ret_val_t ads119x_channel_offset_calibration_enable (void);
+
+ads119x_ret_val_t ads119x_read_data_continous_enable (void);
+ads119x_ret_val_t ads119x_read_data_continous_disable (void);
+
+ads119x_ret_val_t ads119x_read_data_single_shot_start (void);

@@ -43,7 +43,6 @@
 #define ADS119X_REG_MISC2       (0x0A)
 #define ADS119X_REG_GPIO        (0x0B)
 
-
 typedef enum
 {
     //System commands
@@ -76,7 +75,8 @@ typedef enum
     ADS119X_DATA_RATE_1000_SPS = 3,
     ADS119X_DATA_RATE_2000_SPS = 4,
     ADS119X_DATA_RATE_4000_SPS = 5,
-    ADS119X_DATA_RATE_8000_SPS = 6
+    ADS119X_DATA_RATE_8000_SPS = 6,
+    ADS119X_DATA_RATE_INVALID = 7
 
 } ads119x_data_rate_t;
 
@@ -206,13 +206,12 @@ ads119x_ret_val_t ads119x_get_id_register (uint8_t * reg_id_data);
 void ads119x_get_device_id (ads119x_device_id_t * ads119x_device_id);
 
 //CONFIG1 register
-ads119x_ret_val_t ads119x_get_config_1_register (uint8_t * reg_config_1_data);
+asd119x_conversion_mode_t ads119x_get_conversion_mode (const uint8_t reg_config1_data);
+void ads119x_set_conversion_mode (asd119x_conversion_mode_t conv_mode);
 
-void ads119x_get_data_rate (ads119x_data_rate_t * ads119x_data_rate);
+ads119x_data_rate_t ads119x_get_data_rate(const uint8_t reg_config1_data);
 void ads119x_set_data_rate (ads119x_data_rate_t ads119x_data_rate);
 
-void ads119x_get_conversion_mode (asd119x_conversion_mode_t * conv_mode);
-void ads119x_set_conversion_mode (asd119x_conversion_mode_t conv_mode);
 
 //CONFIG2 register
 ads119x_ret_val_t ads119x_get_config_2_register (uint8_t * reg_config_2_data);

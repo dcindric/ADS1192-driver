@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 
 #ifndef ENABLE
@@ -142,11 +143,11 @@ typedef enum
 
 typedef enum
 {
-    ADS119X_PGA_GAIN_1 = 0,
+    ADS119X_PGA_GAIN_6 = 0, //Default PGA gain value is 6.
+    ADS119X_PGA_GAIN_1,
     ADS119X_PGA_GAIN_2,
     ADS119X_PGA_GAIN_3,
     ADS119X_PGA_GAIN_4,
-    ADS119X_PGA_GAIN_6,
     ADS119X_PGA_GAIN_8,
     ADS119X_PGA_GAIN_12
 
@@ -291,8 +292,8 @@ void ads119x_lead_off_ch1_neg_in_disable (void);
 
 void ads119x_lead_off_ch2_pos_in_enable (void);
 void ads119x_lead_off_ch2_pos_in_disable (void);
-void ads119x_lead_off_ch1_neg_in_enable (void);
-void ads119x_lead_off_ch1_neg_in_disable (void);
+void ads119x_lead_off_ch2_neg_in_enable (void);
+void ads119x_lead_off_ch2_neg_in_disable (void);
 
 //LOFF_STAT register
 ads119x_ret_val_t ads119x_get_loff_state_register (uint8_t * reg_loff_stat_data);
@@ -300,19 +301,11 @@ ads119x_ret_val_t ads119x_get_loff_state_register (uint8_t * reg_loff_stat_data)
 void ads119x_set_clock_div_4 (void);
 void ads119x_set_clock_div_16 (void);
 
-void ads119x_get_rld_status (void);
-void ads119x_rld_enable (void);
-void ads119x_rld_disable (void);
-
-void ads119x_ch1_pos_in_enable (void);
-void ads119x_ch1_neg_in_disable (void);
-void ads119x_ch1_neg_in_enable (void);
-void ads119x_ch1_neg_in_disable (void);
-
-void ads119x_ch2_pos_in_enable (void);
-void ads119x_ch2_neg_in_disable (void);
-void ads119x_ch2_neg_in_enable (void);
-void ads119x_ch2_neg_in_disable (void);
+bool ads119x_get_rld_connect_status (uint8_t reg_loff_stat_data);
+bool ads119x_get_ch1_neg_connect_status (uint8_t reg_loff_stat_data);
+bool ads119x_get_ch1_pos_connect_status (uint8_t reg_loff_stat_data);
+bool ads119x_get_ch2_neg_connect_status (uint8_t reg_loff_stat_data);
+bool ads19xx_get_ch2_pos_connect_status (uint8_t reg_loff_stat_data);
 
 //MISC1 register
 ads119x_ret_val_t ads119x_get_misc1_register (uint8_t * reg_misc1_data);
@@ -330,15 +323,17 @@ void ads119x_rld_referenc_get (void);
 //GPIO register
 ads119x_ret_val_t ads119x_get_gpio_register (uint8_t * reg_gpio_data);
 
-void ads119x_gpio1_config (void);
-void ads119x_gpio1_set (void);
-void ads119x_gpio1_reset (void);
-void ads119x_gpio1_get (void);
+void ads119x_gpio1_set_as_input (void);
+void ads119x_gpio1_set_as_output (void);
+void ads119x_gpio1_output_set (void);
+void ads119x_gpio1_output_reset (void);
+bool ads119x_gpio1_status_get (uint8_t reg_gpio_data);
 
-void ads119x_gpio2_config (void);
-void ads119x_gpio2_set (void);
-void ads119x_gpio2_reset (void);
-void ads119x_gpio2_get (void);
+void ads119x_gpio2_set_as_input (void);
+void ads119x_gpio2_set_as_output (void);
+void ads119x_gpio2_output_set (void);
+void ads119x_gpio2_output_reset (void);
+bool ads119x_gpio2_status_get (uint8_t reg_gpio_data);
 
 //Higher-level functions
 ads119x_ret_val_t ads119x_standby_mode_enter (void);

@@ -1,9 +1,18 @@
+/**
+ * @file ads1192.c
+ * @author Dino Cindric
+ * @brief 
+ * @version 0.1
+ * @date 2023-01-22
+ * 
+ */
+
 #include "ads1192.h"
 
 // Global ADS119X configuration structure, accessed by most of the driver functions.
 ads119x_config_t ads119x_config = {0};
 
-/*Function for reading register values in the */
+
 ads119x_ret_val_t ads119x_read_register(uint8_t reg_addr, uint8_t *reg_data)
 {
     uint8_t reg_read_opcode[ADS119X_READ_OPCODE_LEN] = {0};
@@ -156,24 +165,24 @@ ads119x_ret_val_t ads119x_get_config_2_register(uint8_t *reg_config2_data)
     return ret_val;
 }
 
-void ads119x_lead_off_comparator_enable (void)
+void ads119x_enable_lead_off_comparator (void)
 {
     //Writing 1 to bit 6 enables the comparator.
     ads119x_write_register (ADS119X_REG_CONFIG2, ENABLE << 6);
 }
 
-void ads119x_lead_off_comparator_disable (void)
+void ads119x_disable_lead_off_comparator (void)
 {
     //Writing 0 to bit 6 disables the comparator.
     ads119x_write_register (ADS119X_REG_CONFIG2, DISABLE << 6);
 }
 
-void ads119x_reference_buffer_enable (void)
+void ads119x_enable_reference_buffer (void)
 {
     //Writing 1 to bit 5 enables the reference buffer.
     ads119x_write_register (ADS119X_REG_CONFIG2, ENABLE << 5);
 }
-void ads119x_reference_buffer_disable (void)
+void ads119x_disable_reference_buffer (void)
 {
     //Writing 0 to bit 5 disables the reference buffer.
     ads119x_write_register (ADS119X_REG_CONFIG2, DISABLE << 5);
@@ -193,37 +202,37 @@ void ads119x_set_volt_reference (ads119x_reference_t volt_reference_val)
     }
 }
 
-void ads119x_clock_osc_out_enable (void)
+void ads119x_enable_clock_osc_out (void)
 {
     //Writing 1 to bit 3 enables the oscillator clock output.
     ads119x_write_register (ADS119X_REG_CONFIG2, ENABLE << 3);
 }
 
-void ads119x_clock_osc_out_disable (void)
+void ads119x_disable_clock_osc_out (void)
 {
     //Writing 0 to bit 3 disables the oscillator clock output.
     ads119x_write_register (ADS119X_REG_CONFIG2, DISABLE << 3);
 }
 
-void ads119x_test_signal_enable (void)
+void ads119x_enable_test_signal (void)
 {
     //Writing 1 to bit 1 enables the test signal.
     ads119x_write_register (ADS119X_REG_CONFIG2, ENABLE << 1);
 }
 
-void ads119x_test_signal_disable (void)
+void ads119x_disable_test_signal (void)
 {
     //Writing 0 to bit 1 disables the test signal.
     ads119x_write_register (ADS119X_REG_CONFIG2, DISABLE << 1);
 }
 
-void ads119x_test_signal_set_freq_dc (void)
+void ads119x_set_test_signalfreq_dc (void)
 {
     //Writing 0 to bit 0 sets test signal frequency to 0 Hz (dc).
     ads119x_write_register (ADS119X_REG_CONFIG2, DISABLE << 0);
 }
 
-void ads119x_test_signal_set_freq_1hz (void)
+void ads119x_set_test_signalfreq_1hz (void)
 {
     //Writing 1 to bit 0 sets test signal frequency to square wave at 1 Hz.
     ads119x_write_register (ADS119X_REG_CONFIG2, ENABLE << 0);
@@ -240,25 +249,25 @@ ads119x_ret_val_t ads119x_get_loff_register(uint8_t *reg_loff_data)
 }
 
 
-void ads119x_lead_off_comparator_set_pos_val (ads119x_lead_off_comp_pos_side_val_t comp_pos_val)
+void ads119x_set_lead_off_comparator_pos_val (ads119x_lead_off_comp_pos_side_val_t comp_pos_val)
 {
     ads119x_write_register (ADS119X_REG_LOFF, comp_pos_val);    
 }
-void ads119x_lead_off_comparator_set_neg_val (ads119x_lead_off_comp_neg_side_val_t comp_neg_val)
+void ads119x_set_lead_off_comparator_neg_val (ads119x_lead_off_comp_neg_side_val_t comp_neg_val)
 {
     ads119x_write_register (ADS119X_REG_LOFF, comp_neg_val);
 }
 
-void ads119x_lead_off_current_set_val (ads119x_lead_off_curr_val_t lead_off_curr_val)
+void ads119x_set_lead_off_current_val (ads119x_lead_off_curr_val_t lead_off_curr_val)
 {
     ads119x_write_register (ADS119X_REG_LOFF, lead_off_curr_val);
 }
-void ads119x_lead_off_freq_dc (void)
+void ads119x_set_lead_off_freq_dc (void)
 {
     //Writing 0 to bit 0 selects DC lead-off detect frequency.
     ads119x_write_register (ADS119X_REG_LOFF, DISABLE << 0);
 }
-void ads119x_lead_off_freq_ac (void)
+void ads119x_set_lead_off_freq_ac (void)
 {
     //Writing 1 to bit selects AC lead-off detect frequency.
     ads119x_write_register (ADS119X_REG_LOFF, ENABLE << 0);
@@ -273,26 +282,26 @@ ads119x_ret_val_t ads119x_get_ch1set_register(uint8_t *reg_ch1set_data)
      return ret_val;
 }
 
-void ads119x_ch1_power_down (void)
+void ads119x_set_ch1_power_down (void)
 {
     //Writing 1 to bit 7 puts CH1 into power down.
     ads119x_write_register (ADS119X_REG_CH1SET, ENABLE << 7);
 }
 
-void ads119x_ch1_normal_operation (void)
+void ads119x_set_ch1_normal_operation (void)
 {
     //Writing 0 to bit 7 puts channel 1 into normal operation mode.
     ads119x_write_register (ADS119X_REG_CH1SET, DISABLE << 7);
 }
 
-void ads119x_ch1_pga_gain_set_val (ads119x_channel_pga_gain_t pga_gain_val)
+void ads119x_set_ch1_pga_gain_val (ads119x_channel_pga_gain_t pga_gain_val)
 {
     //Bit 6 contains the MSB for PGA gain value. To place 3-bit number MSB to
     //bit position 6, logical shift of 4 is needed (2 to 6).
     ads119x_write_register (ADS119X_REG_CH1SET, pga_gain_val << 4);
 }
 
-void ads119x_ch1_input_source_select (ads119x_ch_input_source_t ch_input_source)
+void ads119x_set_ch1_input_source (ads119x_ch_input_source_t ch_input_source)
 {
     ads119x_write_register (ADS119X_REG_CH1SET, ch_input_source);
 }
@@ -305,26 +314,26 @@ ads119x_ret_val_t ads119x_get_ch2set_register(uint8_t *reg_ch2set_data)
      return ret_val;
 }
 
-void ads119x_ch2_power_down (void)
+void ads119x_set_ch2_power_down (void)
 {
     //Writing 1 to bit 7 puts CH2 into power down.
     ads119x_write_register (ADS119X_REG_CH2SET, ENABLE << 7);
 }
 
-void ads119x_ch2_normal_operation (void)
+void ads119x_set_ch2_normal_operation (void)
 {
     //Writing 0 to bit 7 puts CH2 into normal operation.
     ads119x_write_register (ADS119X_REG_CH2SET, DISABLE << 7);
 }
 
-void ads119x_ch2_pga_gain_set_val (ads119x_channel_pga_gain_t pga_gain_val)
+void ads119x_set_ch2_pga_gain_val (ads119x_channel_pga_gain_t pga_gain_val)
 {
     //Bit 6 contains the MSB for PGA gain value. To place 3-bit number MSB to
     //bit position 6, logical shift of 4 is needed (2 to 6).
     ads119x_write_register (ADS119X_REG_CH2SET, pga_gain_val << 4);
 }
 
-void ads119x_ch2_input_source_select (ads119x_ch_input_source_t ch_input_source)
+void ads119x_set_ch2_input_source (ads119x_ch_input_source_t ch_input_source)
 {
     ads119x_write_register (ADS119X_REG_CH2SET, ch_input_source);
 }
@@ -338,63 +347,63 @@ ads119x_ret_val_t ads119x_get_rld_sens_register(uint8_t *reg_rld_sens_data)
       return ret_val;
 }
 
-void ads119x_rld_buffer_enable (void)
+void ads119x_enable_rld_buffer (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, ENABLE << 5);
 }
 
-void ads119x_rld_buffer_disable (void)
+void ads119x_disable_rld_buffer (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, DISABLE << 5);
 }
 
-void ads119x_rld_lead_off_sense_enable (void)
+void ads119x_enable_rld_lead_off_sense (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, ENABLE << 4);
 }
 
-void ads119x_rld_lead_off_sense_disable (void)
+void ads119x_disable_rld_lead_off_sense (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, DISABLE << 4);
 }
 
-void ads119x_rld_ch1_neg_enable (void)
+void ads119x_enable_rld_ch1_neg (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, ENABLE << 1);
 }
 
-void ads118x_rld_ch1_neg_disable (void)
+void ads118x_disable_rld_ch1_neg (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, DISABLE << 1);
 }
 
-void ads119x_rld_ch1_pos_enable (void)
+void ads119x_enable_rld_ch1_pos (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, ENABLE << 0);
 }
 
-void ads119x_rld_ch1_pos_disable (void)
+void ads119x_disable_rld_ch1_pos (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, DISABLE << 0);
 }
 
-void ads119x_rld_ch2_neg_enable (void)
+void ads119x_enable_rld_ch2_neg (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, ENABLE << 3);
 }
 
-void ads118x_rld_ch2_neg_disable (void)
+void ads118x_disable_rld_ch2_neg (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, DISABLE << 3);
 }
 
-void ads119x_rld_ch2_pos_enable (void)
+void ads119x_enable_rld_ch2_pos (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, ENABLE << 2);
 }
 
 
-void ads119x_rld_ch2_pos_disable (void)
+void ads119x_disable_rld_ch2_pos (void)
 {
     ads119x_write_register (ADS119X_REG_RLD_SENS, DISABLE << 2);
 }
@@ -408,62 +417,62 @@ ads119x_ret_val_t ads119x_get_loff_sens_register(uint8_t *reg_loff_sens_data)
      return ret_val;
 }
 
-void ads119x_lead_off_ch1_curr_dir_enable (void)
+void ads119x_enable_lead_off_ch1_curr_dir (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, ENABLE << 4);
 }
 
-void ads119x_lead_off_ch1_curr_dir_disable (void)
+void ads119x_disable_lead_off_ch1_curr_dir (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, DISABLE << 4);
 }
 
-void ads119x_lead_off_ch2_curr_dir_enable (void)
+void ads119x_enable_lead_off_ch2_curr_dir (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, ENABLE << 5);
 }
 
-void ads119x_lead_off_ch2_curr_dir_disable (void)
+void ads119x_disable_lead_off_ch2_curr_dir (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, DISABLE << 5);
 }
 
-void ads119x_lead_off_ch1_pos_in_enable (void)
+void ads119x_enable_lead_off_ch1_pos_in (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, ENABLE << 0);
 }
 
-void ads119x_lead_off_ch1_pos_in_disable (void)
+void ads119x_disable_lead_off_ch1_pos_in (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, DISABLE << 0);
 }
 
-void ads119x_lead_off_ch1_neg_in_enable (void)
+void ads119x_enable_lead_off_ch1_neg_in (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, ENABLE << 1);
 }
 
-void ads119x_lead_off_ch1_neg_in_disable (void)
+void ads119x_disable_lead_off_ch1_neg_in (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, DISABLE << 1);
 }
 
-void ads119x_lead_off_ch2_pos_in_enable (void)
+void ads119x_enable_lead_off_ch2_pos_in (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, ENABLE << 2);
 }
 
-void ads119x_lead_off_ch2_pos_in_disable (void)
+void ads119x_disable_lead_off_ch2_pos_in (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, DISABLE << 2);
 }
 
-void ads119x_lead_off_ch2_neg_in_enable (void)
+void ads119x_enable_lead_off_ch2_neg_in (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, ENABLE << 3);
 }
 
-void ads119x_lead_off_ch2_neg_in_disable (void)
+void ads119x_disable_lead_off_ch2_neg_in (void)
 {
     ads119x_write_register (ADS119X_REG_LOFF_SENS, DISABLE << 3);
 }
@@ -588,22 +597,22 @@ ads119x_ret_val_t ads119x_get_misc2_register(uint8_t *reg_misc2_data)
      return ret_val;
 }
 
-void ads119x_offset_calibration_enable (void)
+void ads119x_enable_offset_calibration (void)
 {
     ads119x_write_register (ADS119X_REG_MISC2, ENABLE << 7); 
 }
 
-void ads119x_offset_calibration_disable (void)
+void ads119x_disable_offset_calibration (void)
 {
     ads119x_write_register (ADS119X_REG_MISC2, DISABLE << 7);
 }
 
-void ads119x_rld_reference_set_external (void)
+void ads119x_set_rld_reference_external (void)
 {
     ads119x_write_register (ADS119X_REG_MISC2, DISABLE << 0);
 }
 
-void ads119x_rld_reference_set_internal (void)
+void ads119x_set_rld_reference_internal (void)
 {
     ads119x_write_register (ADS119X_REG_MISC2, ENABLE << 1);
 }
@@ -616,48 +625,48 @@ ads119x_ret_val_t ads119x_get_gpio_register (uint8_t * reg_gpio_data)
      return ret_val;
 }
 
-void ads119x_gpio1_set_as_input (void)
+void ads119x_set_gpio1_as_input (void)
 {
     ads119x_write_register (ADS119X_REG_GPIO, ENABLE << 2);
 }
-void ads119x_gpio1_set_as_output (void)
+void ads119x_set_gpio1_as_output (void)
 {
     ads119x_write_register (ADS119X_REG_GPIO, DISABLE << 2);
 }
 
-void ads119x_gpio1_output_set (void)
+void ads119x_set_gpio1_output (void)
 {
     ads119x_write_register (ADS119X_REG_GPIO, ENABLE << 0);
 }
 
-void ads119x_gpio1_output_reset (void)
+void ads119x_reset_gpio1_output (void)
 {
     ads119x_write_register (ADS119X_REG_GPIO, DISABLE << 0);
 }
 
-bool ads119x_gpio1_status_get (uint8_t reg_gpio_data)
+bool ads119x_get_gpio1_status (uint8_t reg_gpio_data)
 {
     bool gpio1_status = reg_gpio_data & (ENABLE << 0);
 
     return gpio1_status;
 }
 
-void ads119x_gpio2_set_as_input (void)
+void ads119x_set_gpio2_as_input (void)
 {
     ads119x_write_register (ADS119X_REG_GPIO, ENABLE << 3);
 }
 
-void ads119x_gpio2_set_as_output (void)
+void ads119x_set_gpio2_as_output (void)
 {
     ads119x_write_register (ADS119X_REG_GPIO, DISABLE << 3);
 }
 
-void ads119x_gpio2_output_set (void)
+void ads119x_set_gpio2_output (void)
 {
     ads119x_write_register (ADS119X_REG_GPIO, ENABLE << 1);
 }
 
-void ads119x_gpio2_output_reset (void)
+void ads119x_reset_gpio2_output (void)
 {
     ads119x_write_register (ADS119X_REG_GPIO, DISABLE << 1);
 }

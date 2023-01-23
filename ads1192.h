@@ -1,15 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-
-#ifndef ENABLE
-#define ENABLE 1
-#endif
-
-#ifndef DISABLE
-#define DISABLE 0
-#endif
-
 /*Read opcode bytes definitions*/
 #define ADS119X_READ_FIRST_OPCODE_BYTE   (0x20)  
 #define ADS119X_READ_SECOND_OPCODE_BYTE  (0x00)  //Number of regs to read - 1.
@@ -66,6 +57,20 @@ typedef enum
     ADS119X_RET_FAIL    
 
 } ads119x_ret_val_t;
+
+typedef enum
+{
+    DISABLE,
+    ENABLE
+
+} enable_t;
+
+typedef enum
+{
+    ADS119X_CH1,
+    ADS119X_CH2
+
+} ads119x_ch_idx_t;
 
 
 typedef enum
@@ -214,95 +219,95 @@ void ads119x_set_data_rate (ads119x_data_rate_t ads119x_data_rate);
 //CONFIG2 register
 ads119x_ret_val_t ads119x_get_config_2_register (uint8_t * reg_config_2_data);
 
-void ads119x_enable_lead_off_comparator (void);
-void ads119x_disable_lead_off_comparator (void);
+void ads119x_control_lead_off_comparator (enable_t command);
+bool ads119x_get_lead_off_comparator_status (const uint8_t reg_config_2_data);
 
-void ads119x_enable_reference_buffer (void);
-void ads119x_disable_reference_buffer (void);
+void ads119x_control_reference_buffer (enable_t command);
+bool ads119x_get_reference_buffer_status (const uint8_t reg_config_2_data);
 
 void ads119x_set_volt_reference (ads119x_reference_t volt_reference_val);
+ads119x_reference_t ads119x_get_volt_reference (const uint8_t reg_config_2_data);
 
-void ads119x_enable_clock_osc_out (void);
-void ads119x_disable_clock_osc_out (void);
+void ads119x_control_clock_osc_out (enable_t command);
+bool ads119x_get_clock_osc_out_status (const uint8_t reg_config_2_data);
 
-void ads119x_enable_test_signal (void);
-void ads119x_disable_test_signal (void);
+void ads119x_control_test_signal (enable_t command);
+bool ads119x_get_test_signal_status (const uint8_t reg_config_2_data);
+
 void ads119x_set_test_signalfreq_dc (void);
 void ads119x_set_test_signalfreq_1hz (void);
+bool ads119x_get_test_signalfreq_status (const uint8_t reg_config_2_data);
 
 //LOFF register
 ads119x_ret_val_t ads119x_get_loff_register (uint8_t * reg_loff_data);
 
-void ads119x_set_lead_off_comparatorpos_val (ads119x_lead_off_comp_pos_side_val_t comp_pos_val);
-void ads119x_set_lead_off_comparator_neg_val (ads119x_lead_off_comp_neg_side_val_t comp_neg_val);
+void ads119x_set_lead_off_comparator_thres (ads119x_lead_off_comp_pos_side_val_t comp_pos_val);
+ads119x_lead_off_comp_pos_side_val_t ads119x_get_lead_off_comparator_pos_thres (const uint8_t reg_loff_data);
+ads119x_lead_off_comp_neg_side_val_t ads119x_get_lead_off_comparator_neg_thres (const uint8_t reg_loff_data);
 
 void ads119x_set_lead_off_current_val (ads119x_lead_off_curr_val_t lead_off_curr_val);
+ads119x_lead_off_curr_val_t ads119x_get_lead_off_current_val (const uint8_t reg_loff_data);
+
 void ads119x_set_lead_off_freq_dc (void);
 void ads119x_set_lead_off_freq_ac (void);
+bool ads119x_get_lead_off_freq_status (const uint8_t reg_loff_data);
 
-//CH1SET register
+//CH1SET and CH2SET registers
 ads119x_ret_val_t ads119x_get_ch1set_register (uint8_t * reg_ch1set_data);
-
-void ads119x_set_ch1_power_down (void);
-void ads119x_set_ch1_normal_operation (void);
-void ads119x_set_ch1_pga_gain_val (ads119x_channel_pga_gain_t pga_gain_val);
-void ads119x_set_ch1_input_source (ads119x_ch_input_source_t ch_input_source);
-
-//CH2 register
 ads119x_ret_val_t ads119x_get_ch2set_register (uint8_t * reg_ch2set_data);
 
-void ads119x_set_ch2_power_down (void);
-void ads119x_set_ch2_normal_operation (void);
-void ads119x_set_ch2_pga_gain_val (ads119x_channel_pga_gain_t pga_gain_val);
-void ads119x_set_ch2_input_source (ads119x_ch_input_source_t ch_input_source);
+
+void ads119x_set_ch_power_down (ads119x_ch_idx_t ch_idx);
+void ads119x_set_ch_normal_operation (ads119x_ch_idx_t ch_idx);
+bool ads119x_get_ch_power_status (ads119x_ch_idx_t ch_idx);
+
+void ads119x_set_ch_pga_gain_val (ads119x_ch_idx_t ch_idx, ads119x_channel_pga_gain_t pga_gain_val);
+ads119x_channel_pga_gain_t ads119x_get_ch_pga_gain_val (const uint8_t reg_ch1set_data, ads119x_ch_idx_t ch_idx);
+
+void ads119x_set_ch_input_source (ads119x_ch_idx_t ch_idx, ads119x_ch_input_source_t ch_input_source);
+ads119x_ch_input_source_t ads119x_get_ch_input_source (const uint8_t reg_ch1set_data, ads119x_ch_idx_t ch_idx);
+
 
 //RLD_SENS register
 ads119x_ret_val_t ads119x_get_rld_sens_register (uint8_t * reg_rld_sens_data);
 
-void ads119x_enable_rld_buffer (void);
-void ads119x_disable_rld_buffer (void);
-void ads119x_enable_rld_lead_off_sense (void);
-void ads119x_disable_rld_lead_off_sense (void);
-void ads119x_enable_rld_ch1_neg (void);
-void ads118x_disable_rld_ch1_neg (void);
-void ads119x_enable_rld_ch1_pos (void);
-void ads119x_disable_rld_ch1_pos (void);
+void ads119x_control_rld_buffer (enable_t command);
+bool ads119x_get_rld_buffer_status (const reg_rld_sens_data);
 
-void ads119x_enable_rld_ch2_neg (void);
-void ads118x_disable_rld_ch2_neg (void);
-void ads119x_enable_rld_ch2_pos (void);
-void ads119x_disable_rld_ch2_pos (void);
+void ads119x_control_rld_lead_off_sense (enable_t command);
+bool ads119x_get_rld_lead_off_sense_status (const reg_rld_sens_data);
+
+void ads119x_control_rld_ch_neg (ads119x_ch_idx_t ch_idx, enable_t command);
+bool ads119x_get_rld_ch_neg_status (const reg_rld_sens_data, ads119x_ch_idx_t ch_idx);
+
+void ads119x_control_rld_ch_pos (ads119x_ch_idx_t ch_idx, enable_t command);
+bool ads119x_get_rld_ch_pos_status (const reg_rld_sens_data, ads119x_ch_idx_t ch_idx);
+
 
 //LOFF_SENS register
 ads119x_ret_val_t ads119x_get_loff_sens_register (uint8_t * reg_loff_sens_data);
 
-void ads119x_enable_lead_off_ch1_curr_dir (void);
-void ads119x_disable_lead_off_ch1_curr_dir (void);
+void ads119x_control_lead_off_curr_dir (ads119x_ch_idx_t ch_idx, uint8_t command);
+bool ads119x_get_lead_off_curr_dir_status (const uint8_t reg_loff_sens_data, ads119x_ch_idx_t ch_idx);
 
-void ads119x_enable_lead_off_ch2_curr_dir (void);
-void ads119x_disable_lead_off_ch2_curr_dir (void);
+void ads119x_control_lead_off_pos_in (ads119x_ch_idx_t ch_idx, uint8_t command);
+bool ads119x_get_lead_off_pos_in_status (const uint8_t reg_loff_sens_data, ads119x_ch_idx_t ch_idx);
 
-void ads119x_enable_lead_off_ch1_pos_in (void);
-void ads119x_disable_lead_off_ch1_pos_in (void);
-void ads119x_enable_lead_off_ch1_neg_in (void);
-void ads119x_disable_lead_off_ch1_neg_in (void);
-
-void ads119x_enable_lead_off_ch2_pos_in (void);
-void ads119x_disable_lead_off_ch2_pos_in (void);
-void ads119x_lead_off_ch2_neg_in_enable (void);
-void ads119x_lead_off_ch2_neg_in_disable (void);
+void ads119x_control_lead_off_neg_in (ads119x_ch_idx_t ch_idx, uint8_t command);
+bool ads119x_get_lead_off_neg_in_status (const uint8_t reg_loff_sens_data, ads119x_ch_idx_t ch_idx);
 
 //LOFF_STAT register
 ads119x_ret_val_t ads119x_get_loff_state_register (uint8_t * reg_loff_stat_data);
 
 void ads119x_set_clock_div_4 (void);
 void ads119x_set_clock_div_16 (void);
+bool ads119x_get_clock_div_status (const uint8_t reg_loff_stat_data);
 
 bool ads119x_get_rld_connect_status (uint8_t reg_loff_stat_data);
-bool ads119x_get_ch1_neg_connect_status (uint8_t reg_loff_stat_data);
-bool ads119x_get_ch1_pos_connect_status (uint8_t reg_loff_stat_data);
-bool ads119x_get_ch2_neg_connect_status (uint8_t reg_loff_stat_data);
-bool ads19xx_get_ch2_pos_connect_status (uint8_t reg_loff_stat_data);
+
+bool ads119x_get_pos_elect_connect_status (const uint8_t reg_loff_stat_data, ads119x_ch_idx_t ch_idx);
+bool ads119x_get_neg_elect_connect_status (const uint8_t reg_loff_stat_data, ads119x_ch_idx_t ch_idx);
+
 
 //MISC1 register
 ads119x_ret_val_t ads119x_get_misc1_register (uint8_t * reg_misc1_data);

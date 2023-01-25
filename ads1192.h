@@ -35,6 +35,16 @@
 #define ADS119X_REG_MISC2       (0x0A)
 #define ADS119X_REG_GPIO        (0x0B)
 
+/*Helper definitions*/
+#define BIT_POS_0   (0)
+#define BIT_POS_1   (1)
+#define BIT_POS_2   (2)
+#define BIT_POS_3   (3)
+#define BIT_POS_4   (4)
+#define BIT_POS_5   (5)
+#define BIT_POS_6   (6)
+#define BIT_POS_7   (7)
+
 typedef enum
 {
     //System commands
@@ -259,29 +269,29 @@ ads119x_ret_val_t ads119x_get_ch2set_register (uint8_t * reg_ch2set_data);
 
 void ads119x_set_ch_power_down (ads119x_ch_idx_t ch_idx);
 void ads119x_set_ch_normal_operation (ads119x_ch_idx_t ch_idx);
-bool ads119x_get_ch_power_status (ads119x_ch_idx_t ch_idx);
+bool ads119x_get_ch_power_status (const uint8_t reg_ch_x_set_data, ads119x_ch_idx_t ch_idx);
 
 void ads119x_set_ch_pga_gain_val (ads119x_ch_idx_t ch_idx, ads119x_channel_pga_gain_t pga_gain_val);
-ads119x_channel_pga_gain_t ads119x_get_ch_pga_gain_val (const uint8_t reg_ch1set_data, ads119x_ch_idx_t ch_idx);
+ads119x_channel_pga_gain_t ads119x_get_ch_pga_gain_val (const uint8_t reg_ch_x_set_data, ads119x_ch_idx_t ch_idx);
 
 void ads119x_set_ch_input_source (ads119x_ch_idx_t ch_idx, ads119x_ch_input_source_t ch_input_source);
-ads119x_ch_input_source_t ads119x_get_ch_input_source (const uint8_t reg_ch1set_data, ads119x_ch_idx_t ch_idx);
+ads119x_ch_input_source_t ads119x_get_ch_input_source (const uint8_t reg_ch_x_set_data, ads119x_ch_idx_t ch_idx);
 
 
 //RLD_SENS register
 ads119x_ret_val_t ads119x_get_rld_sens_register (uint8_t * reg_rld_sens_data);
 
 void ads119x_control_rld_buffer (enable_t command);
-bool ads119x_get_rld_buffer_status (const reg_rld_sens_data);
+bool ads119x_get_rld_buffer_status (const uint8_t reg_rld_sens_data);
 
 void ads119x_control_rld_lead_off_sense (enable_t command);
-bool ads119x_get_rld_lead_off_sense_status (const reg_rld_sens_data);
+bool ads119x_get_rld_lead_off_sense_status (const uint8_t reg_rld_sens_data);
 
 void ads119x_control_rld_ch_neg (ads119x_ch_idx_t ch_idx, enable_t command);
-bool ads119x_get_rld_ch_neg_status (const reg_rld_sens_data, ads119x_ch_idx_t ch_idx);
+bool ads119x_get_rld_ch_neg_status (const uint8_t reg_rld_sens_data, ads119x_ch_idx_t ch_idx);
 
 void ads119x_control_rld_ch_pos (ads119x_ch_idx_t ch_idx, enable_t command);
-bool ads119x_get_rld_ch_pos_status (const reg_rld_sens_data, ads119x_ch_idx_t ch_idx);
+bool ads119x_get_rld_ch_pos_status (const uint8_t reg_rld_sens_data, ads119x_ch_idx_t ch_idx);
 
 
 //LOFF_SENS register
@@ -315,11 +325,12 @@ ads119x_ret_val_t ads119x_get_misc1_register (uint8_t * reg_misc1_data);
 //MISC2 register
 ads119x_ret_val_t ads119x_get_misc2_register (uint8_t * reg_misc2_data);
 
-void ads119x_enable_offset_calibration (void);
-void ads119x_disable_offset_calibration (void);
+void ads119x_control_offset_calibration (enable_t command);
+bool ads119x_get_offset_calibration_status (const uint8_t reg_misc2_data);
 
 void ads119x_set_rld_reference_external (void);
 void ads119x_set_rld_reference_internal (void);
+bool ads119x_get_rld_references_status (const uint8_t reg_misc2_data);
 
 
 //GPIO register
@@ -327,15 +338,13 @@ ads119x_ret_val_t ads119x_get_gpio_register (uint8_t * reg_gpio_data);
 
 void ads119x_set_gpio1_as_input (void);
 void ads119x_set_gpio1_as_output (void);
-void ads119x_set_gpio1_output (void);
-void ads119x_reset_gpio1_output (void);
-bool ads119x_get_gpio1_status (uint8_t reg_gpio_data);
+void ads119x_control_gpio1_output (enable_t command);
+bool ads119x_get_gpio1_status (const uint8_t reg_gpio_data);
 
 void ads119x_set_gpio2_as_input (void);
 void ads119x_set_gpio2_as_output (void);
-void ads119x_set_gpio2_output (void);
-void ads119x_reset_gpio2_output (void);
-bool ads119x_get_gpio2_status (uint8_t reg_gpio_data);
+void ads119x_control_gpio2_output (enable_t command);
+bool ads119x_get_gpio2_status (const uint8_t reg_gpio_data);
 
 //Higher-level functions
 ads119x_ret_val_t ads119x_comm_interface_init (void);

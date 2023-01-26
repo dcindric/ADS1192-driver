@@ -362,10 +362,12 @@ void ads119x_init_comm_interface (ads119x_config_t * dev_config);
 ads119x_ret_val_t ads119x_init_device (ads119x_config_t * dev_config);
 
 ads119x_ret_val_t ads119x_standby_mode_enter (void);
-ads119x_ret_val_t ads119x_standby_mode_wakeup (void);
+ads119x_ret_val_t ads119x_standby_mode_wakeup (ads119x_config_t * dev_config);
 
-ads119x_ret_val_t ads119x_start_conversion (void);
-ads119x_ret_val_t ads119x_stop_conversion (void);
+void ads119x_reset_registers_to_default (ads119x_config_t * dev_config);
+
+void ads119x_start_conversion (ads119x_config_t * dev_config);
+void ads119x_stop_conversion (ads119x_config_t * dev_config);
 
 void ads119x_read_data (ads119x_config_t * dev_config, uint16_t * data);
 

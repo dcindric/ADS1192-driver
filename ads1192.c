@@ -356,6 +356,12 @@ void ads119x_set_ch_pga_gain_val (ads119x_ch_idx_t ch_idx, ads119x_channel_pga_g
     {
         ads119x_write_register (ADS119X_REG_CH2SET, (uint8_t) pga_gain_val << BIT_POS_4);
     }
+
+    /*Channel offset calibration must be executed every time there is a change in the PGA gain settings.
+      First, the offset calibration must be enable in MISC2 register, and then OFFSETCAL command must be sent.
+    */
+    ads119x_control_offset_calibration (ENABLE);
+    ads119x_write_command (ADS119X_OFFSETCAL);
 }
 
 
@@ -777,7 +783,8 @@ ads119x_ret_val_t ads119x_init_device (ads119x_config_t * dev_config)
     dev_config -> f_dev_reset (ENABLE);
     dev_config -> f_dev_time_delay (1000);
 
-    //Issue a reset pulse and wait 18 clock cycles or more.
+    //Issue a reset pulse and wait 18 clock cycles or more. 
+    //NOTE: Alternative is to send a RESET command.
     dev_config -> f_dev_reset (DISABLE);
     dev_config -> f_dev_time_delay (10);
     dev_config -> f_dev_reset (ENABLE);
@@ -819,8 +826,13 @@ ads119x_ret_val_t ads119x_init_device (ads119x_config_t * dev_config)
     ads119x_set_ch_input_source (ADS119X_CH1, ADS119X_NORMAL_ELEC_IN);
     ads119x_set_ch_input_source (ADS119X_CH2, ADS119X_NORMAL_ELEC_IN);
 
+    //Set both GPIO pins as outputs. After power-on they are configured as inputs and must be driven.
+    ads119x_set_gpio1_as_output();
+    ads119x_set_gpio2_as_output();
+
     //Set START high and activate conversion. After this point DRDY pin should toggle
     //at fclk/256.
+    //NOTE: Alternatively, START command can be sent. In that case, START pin must be held low.
     dev_config -> f_dev_start_control (ENABLE);
 
     //Put the device back in RDATAC mode.
@@ -855,20 +867,28 @@ ads119x_ret_val_t ads119x_standby_mode_enter (void)
     return ret_val;
 }
 
-ads119x_ret_val_t ads119x_standby_mode_wakeup (void)
+ads119x_ret_val_t ads119x_standby_mode_wakeup (ads119x_config_t * dev_config)
 {
     ads119x_ret_val_t ret_val = ads119x_write_command (ADS119X_WAKEUP);
+    dev_config -> f_dev_time_delay (1);
     return ret_val;
 }
 
-ads119x_ret_val_t ads119x_start_conversion (void)
+void ads119x_reset_registers_to_default (ads119x_config_t * dev_config)
 {
-    ads119x_ret_val_t ret_val = ads119x_write_command (ADS119X_START);
-    return ret_val;
+    ads119x_write_command (ADS119X_RESET);
+    dev_config -> f_dev_time_delay (1);
 }
 
-ads119x_ret_val_t ads119x_stop_conversion (void)
+void ads119x_start_conversion (ads119x_config_t * dev_config)
 {
-    ads119x_ret_val_t ret_val = ads119x_write_command (ADS119X_STOP);
-    return ret_val;
+    //If the START command is used to start conversion, START pin must be held low.
+    dev_config -> f_dev_start_control (ENABLE);
+    dev_config -> f_dev_time_delay (1);
+}
+
+void ads119x_stop_conversion (ads119x_config_t * dev_config)
+{
+    dev_config -> f_dev_start_control (DISABLE);
+    dev_config -> f_dev_time_delay (1);
 }

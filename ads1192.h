@@ -188,15 +188,17 @@ typedef enum
 /*Function pointer type declarations*/
 typedef ads119x_ret_val_t (*ads119x_spi_write) (uint8_t * send_buffer, uint8_t len);
 typedef ads119x_ret_val_t (*ads119x_spi_read) (uint8_t * recv_buffer, uint8_t len);
-typedef ads119x_ret_val_t (*ads119x_start_set) (uint8_t start_pin_state);
+typedef ads119x_ret_val_t (*ads119x_start_control) (uint8_t start_pin_state);
 typedef ads119x_ret_val_t (*ads119x_reset) (uint8_t reset_pin_state);
+typedef ads119x_ret_val_t (*ads119x_time_delay) (uint32_t time_delay_period);
 
 typedef struct
 {
     ads119x_spi_read f_dev_spi_read; 
     ads119x_spi_write f_dev_spi_write;
-    ads119x_start_set f_dev_start_set;
+    ads119x_start_control f_dev_start_control;
     ads119x_reset f_dev_reset;
+    ads119x_time_delay f_dev_time_delay;
 
 } ads119x_config_t;
 
@@ -346,18 +348,28 @@ void ads119x_set_gpio2_as_output (void);
 void ads119x_control_gpio2_output (enable_t command);
 bool ads119x_get_gpio2_status (const uint8_t reg_gpio_data);
 
-//Higher-level functions
-ads119x_ret_val_t ads119x_comm_interface_init (void);
-ads119x_ret_val_t ads119x_device_init (void);
+/*Higher-level functions*/
+
+//SPI write and read functions, start and reset function must be implemented by the user.
+ads119x_ret_val_t port_spi_write (uint8_t * send_buffer, uint8_t len);
+ads119x_ret_val_t port_spi_read (uint8_t * recv_buffer, uint8_t len);
+ads119x_ret_val_t port_start_pin_ctrl (uint8_t start_pin_state);
+ads119x_ret_val_t port_reset_pin_ctrl (uint8_t reset_pin_state);
+ads119x_ret_val_t port_time_delay (uint32_t time_delay_period);
+
+
+void ads119x_init_comm_interface (ads119x_config_t * dev_config);
+ads119x_ret_val_t ads119x_init_device (ads119x_config_t * dev_config);
 
 ads119x_ret_val_t ads119x_standby_mode_enter (void);
 ads119x_ret_val_t ads119x_standby_mode_wakeup (void);
 
 ads119x_ret_val_t ads119x_start_conversion (void);
 ads119x_ret_val_t ads119x_stop_conversion (void);
-ads119x_ret_val_t ads119x_channel_offset_calibration_enable (void);
 
-ads119x_ret_val_t ads119x_read_data_continous_enable (void);
-ads119x_ret_val_t ads119x_read_data_continous_disable (void);
+void ads119x_read_data (ads119x_config_t * dev_config, uint16_t * data);
 
-ads119x_ret_val_t ads119x_read_data_single_shot_start (void);
+ads119x_ret_val_t ads119x_enable_read_data_continous (void);
+ads119x_ret_val_t ads119x_disable_read_data_continous (void);
+
+ads119x_ret_val_t ads119x_start_read_data_single_shot (void);

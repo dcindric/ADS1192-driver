@@ -13,7 +13,7 @@
 ads119x_config_t ads119x_config = {0};
 
 
-ads119x_ret_val_t ads119x_read_register(uint8_t reg_addr, uint8_t *reg_data)
+ads119x_ret_val_t ads119x_read_register(const uint8_t reg_addr, uint8_t *reg_data)
 {
     uint8_t reg_read_opcode[ADS119X_READ_OPCODE_LEN] = {0};
 
@@ -57,6 +57,7 @@ ads119x_ret_val_t ads119x_write_register(uint8_t reg_addr, uint8_t reg_command)
 ads119x_ret_val_t ads119x_write_command(ads119x_command_t ads119x_command)
 {
     uint8_t write_command = (uint8_t) ads119x_command;
+
     // Command size will always be equal to one byte.
     ads119x_ret_val_t ret_val = ads119x_config.f_dev_spi_write(&write_command, sizeof(write_command));
     return ret_val;
@@ -751,4 +752,123 @@ bool ads119x_gpio2_status_get (uint8_t reg_gpio_data)
     bool gpio2_status = reg_gpio_data & (ENABLE << BIT_POS_1);
 
     return gpio2_status;
+}
+
+
+//Higher-level functions
+void ads119x_init_comm_interface (ads119x_config_t * dev_config)
+{
+    //Function starting with port must be implemented by the user.
+    dev_config -> f_dev_spi_write = port_spi_write;
+    dev_config -> f_dev_spi_read = port_spi_read;
+    dev_config -> f_dev_start_control = port_start_pin_ctrl;
+    dev_config -> f_dev_reset = port_reset_pin_ctrl;
+    dev_config -> f_dev_time_delay = port_time_delay;
+}
+
+ads119x_ret_val_t ads119x_init_device (ads119x_config_t * dev_config)
+{
+    ads119x_ret_val_t ret_val = ADS119X_RET_FAIL;
+
+    //Map port-specific functions to ADS119x interface.
+    ads119x_init_comm_interface(&ads119x_config);
+
+    //Set PWDN/RESET to 1 and wait for 1 s for power-on reset. RESET is active low.
+    dev_config -> f_dev_reset (ENABLE);
+    dev_config -> f_dev_time_delay (1000);
+
+    //Issue a reset pulse and wait 18 clock cycles or more.
+    dev_config -> f_dev_reset (DISABLE);
+    dev_config -> f_dev_time_delay (10);
+    dev_config -> f_dev_reset (ENABLE);
+
+    //Device wakes up in RDATAC mode, send the SDATAC command so registers can be written.
+    ads119x_write_command (ADS119X_SDATAC);
+
+    //Use the internal reference and wait for it to settle.
+    ads119x_control_reference_buffer (ENABLE);
+    dev_config -> f_dev_time_delay (100);
+
+    //Set the data rate to 500 SPS.
+    ads119x_set_data_rate (ADS119X_DATA_RATE_500_SPS);
+
+    //Set continous conversion mode.
+    ads119x_set_conversion_mode (ADS119X_CONV_MODE_CONT);
+
+    //Disable the lead-off comparator.
+    ads119x_control_lead_off_comparator (DISABLE);
+
+    //Set internal voltage reference to 2.42V.
+    ads119x_set_volt_reference (ADS119X_2_42V);
+
+    //Disable the oscillator clock output. 
+    ads119x_control_clock_osc_out (DISABLE);
+
+    //Turn off the test signal.
+    ads119x_control_test_signal (DISABLE);
+
+    //Set channels CH1 and CH2 into normal operation mode.
+    ads119x_set_ch_normal_operation (ADS119X_CH1);
+    ads119x_set_ch_normal_operation (ADS119X_CH2);
+
+    //Configure PGA gain value to 4 for both channels.
+    ads119x_set_ch_pga_gain_val (ADS119X_CH1, ADS119X_PGA_GAIN_4);
+    ads119x_set_ch_pga_gain_val (ADS119X_CH2, ADS119X_PGA_GAIN_4);
+
+    //Configure input source for both channels to sample signals from electrode.
+    ads119x_set_ch_input_source (ADS119X_CH1, ADS119X_NORMAL_ELEC_IN);
+    ads119x_set_ch_input_source (ADS119X_CH2, ADS119X_NORMAL_ELEC_IN);
+
+    //Set START high and activate conversion. After this point DRDY pin should toggle
+    //at fclk/256.
+    dev_config -> f_dev_start_control (ENABLE);
+
+    //Put the device back in RDATAC mode.
+    ads119x_write_command (ADS119X_RDATAC);
+    dev_config -> f_dev_time_delay (100);
+}
+
+/**
+ * @brief This function should be called in the ISR when DRDY is asserted low.
+ * 
+ * @param data 
+ */
+void ads119x_read_data (ads119x_config_t * dev_config, uint16_t * data)
+{
+    //Data output format is: 16 bit status reg data + 16 bit CH1 data + 16 bit CH2 data.
+    uint8_t raw_data[6] = {0};
+    dev_config -> f_dev_spi_read (raw_data, sizeof (raw_data));
+
+    //First two bytes are status register data.
+    data[0] = (raw_data[0] << 8) | raw_data[1];
+
+    //Next two bytes are CH1 measurement data.
+    data[1] = (raw_data[2] << 8) | raw_data[3];
+
+    //Final two bytes are CH2 measurement data.
+    data[2] = (raw_data[4] << 8) | raw_data[5];
+}
+
+ads119x_ret_val_t ads119x_standby_mode_enter (void)
+{
+    ads119x_ret_val_t ret_val = ads119x_write_command (ADS119X_STANDBY);
+    return ret_val;
+}
+
+ads119x_ret_val_t ads119x_standby_mode_wakeup (void)
+{
+    ads119x_ret_val_t ret_val = ads119x_write_command (ADS119X_WAKEUP);
+    return ret_val;
+}
+
+ads119x_ret_val_t ads119x_start_conversion (void)
+{
+    ads119x_ret_val_t ret_val = ads119x_write_command (ADS119X_START);
+    return ret_val;
+}
+
+ads119x_ret_val_t ads119x_stop_conversion (void)
+{
+    ads119x_ret_val_t ret_val = ads119x_write_command (ADS119X_STOP);
+    return ret_val;
 }
